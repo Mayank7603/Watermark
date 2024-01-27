@@ -10,17 +10,11 @@ app.use(cors());
 const port = 3001;
 
 const setWatermark = async (inputPath, outputPath) => {
-    // console.log("dsfds");
-    // sharp(`${inputPath}`)
-    //     .metadata()
-    //     .then(metadata => console.log('Supported formats:', metadata.format))
-    //     .catch(error => console.error('Error:', error));
-
     try {
         await sharp(inputPath).composite([{
             input: "./uploads/logo.png",
-            top: 0,
-            left: 0,
+            bottom: 0,
+            right: 0,
         }]).toFile(outputPath);
 
         console.log("Watermark added successfully");
@@ -43,13 +37,13 @@ var outputPath;
 app.post('/upload', upload.single('file'), async (req, res) => {
     const inputPath = `uploads/${req.file.filename}`;
     outputPath = `uploads/op${req.file.filename}`;
-
+    console.log("uisd");
     await setWatermark(inputPath, outputPath);
 
 });
 
 app.get("/dnd", (req, res) => {
-    res.download("./" + outputPath, "watermarked.png");
+    res.download("./" + outputPath);
 })
 
 

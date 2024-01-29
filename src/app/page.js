@@ -3,55 +3,63 @@
 import axios from 'axios';
 import fileDownload from 'js-file-download';
 import { useState } from 'react';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+// const images = require.context("./api/upload/uploads_output", true);
+// const imageList = images.keys().map(image => images(image));
+// console.log(imageList);
 
 const Home = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState(null);
+  const [txt, showtxt] = useState(false);
 
   const handleFileChange = (event) => {
     console.log("file change handling");
-    setSelectedFile(event.target.files[0]);
-    // setSelectedFile({...selectedFile + eve})
+    setSelectedFiles(event.target.files);
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) {
+    if (!selectedFiles) {
       console.log("ds");
       return;
     }
 
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    for (let i = 0; i < selectedFiles.length; i++) {
+      console.log(`file ${i + 1} uploading`);
+      formData.append(`files`, selectedFiles[i]);
+    }
+    console.log(...formData);
 
     await axios.post('http://localhost:3001/upload', formData);
   };
 
-  const handleDownload = (e) => {
+  const handleDownload = async (e) => {
+    showtxt(true);
+
     e.preventDefault();
-    axios({
-      url: 'http://localhost:3001/dnd',
-      method: 'GET',
+    await axios.get('http://localhost:3001/download', {
       responseType: 'blob',
     }).then((res) => {
-      fileDownload(res.data, 'watermarked.png');
+      console.log(res.data);
+      fileDownload(res.data, "watermarked.zip");
     });
 
+    setSelectedFiles(null);
+    showtxt(false)
 
-    setSelectedFile(null);
   };
 
   return (
     <div className="flex flex-col gap-12 items-center justify-center">
       <div className="flex  items-center justify-center bg-gray-100 font-sans mt-24">
         <label className="mx-auto cursor-pointer flex w-full max-w-lg flex-col items-center rounded-xl border-2 border-dashed border-blue-400 bg-white p-6 text-center">
-          {/* {!selectedFile && <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-          </svg>} */}
 
-          {!selectedFile && <h2 className="mt-4 text-xl font-medium text-gray-700 tracking-wide" > Input File</h2 >}
+          {!selectedFiles && <h2 className="mt-4 text-xl font-medium text-gray-700 tracking-wide" > Input File</h2 >}
 
-          {!selectedFile && <p className="mt-2 text-gray-500 tracking-wide" > Upload or darg & drop your file SVG, PNG, JPG or GIF. </p >}
+          {!selectedFiles && <p className="mt-2 text-gray-500 tracking-wide" > Upload or darg & drop your file SVG, PNG, JPG or GIF. </p >}
 
-          {selectedFile && <p className="mt-2 text-gray-500 tracking-wide" > Upload and Download you updated file. </p >}
+          {selectedFiles && <p className="mt-2 text-gray-500 tracking-wide" > Upload and Download you updated file. </p >}
 
 
           <input id="dropzone-file" type="file" multiple className="hidden" onChange={handleFileChange} />
@@ -63,12 +71,19 @@ const Home = () => {
           onClick={handleUpload}>
           Upload
         </button>
-        {selectedFile && <button
+        {selectedFiles && <button
           className="p-4 font-bold text-white bg-green-500 rounded-xl hover:scale-110"
           onClick={handleDownload}>
           Download
         </button>}
+
       </div>
+
+      {txt &&
+        <div className='text-slate-500 text-xl'>
+          Your download will begin in 5 seconds.
+        </div>
+      }
     </div >
   );
 };

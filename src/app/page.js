@@ -99,7 +99,7 @@ const Home = () => {
 
           {!selectedFiles && <h2 className="mt-4 text-xl font-medium text-gray-700 tracking-wide" > Input Photos</h2 >}
 
-          {!selectedFiles && <p className="mt-2 text-gray-500 tracking-wide" > Upload or darg & drop your file  </p >}
+          {!selectedFiles && <p className="mt-2 text-gray-500 tracking-wide" > Upload your file  </p >}
 
           {selectedFiles && <p className="mt-2 text-gray-500 tracking-wide" > Upload and Download you updated file. </p >}
 

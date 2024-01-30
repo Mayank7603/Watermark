@@ -32,7 +32,17 @@ const storage = multer.diskStorage({
     },
 });
 
+const storageVideo = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploadVideo/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    },
+});
+
 const upload = multer({ storage });
+const uploadVideo = multer({ storageVideo });
 let zipFilePath;
 
 
@@ -72,6 +82,7 @@ async function makeZip(outputPaths) {
 }
 
 var outputPaths = [];
+var OutputVideoPath = [];
 
 
 app.post('/upload', upload.any('files'), async (req, res) => {
@@ -85,6 +96,28 @@ app.post('/upload', upload.any('files'), async (req, res) => {
     });
 });
 
+app.post("/uploadVideo", uploadVideo.any('videos'), async (req, res) => {
+    const arr = req.videos;
+
+    console.log("this :  ", arr);
+    arr.forEach(async (singleVideo) => {
+        const name = singleVideo.originalname;
+        console.log(name);
+        // const videoURL = `/uploadVideo/${name}`;
+        // const watermarkImageURL = './uploads/logo.png';
+        // const outputFilename = `/outputVideo/${name}`;
+        // OutputVideoPath.push(outputFilename);
+        // addWatermark(videoURL, watermarkImageURL, outputFilename)
+        //     .then(() => {
+        //         console.log('Watermark added successfully!');
+        //     })
+        //     .catch((error) => {
+        //         console.error('Error:', error.message);
+        //     });
+    });
+
+})
+
 app.get("/download", (req, res) => {
 
     makeZip(outputPaths);
@@ -96,7 +129,6 @@ app.get("/download", (req, res) => {
 
 });
 
-// var OutputVideoPath = [];
 
 // async function makeZipVideo(outputPaths) {
 
@@ -151,26 +183,7 @@ app.get("/download", (req, res) => {
 //     }
 // }
 
-// app.post("/uploadVideo", upload.any('videos'), async (req, res) => {
-//     const arr = req.videos;
 
-//     console.log("this :  ", arr);
-//     // arr.forEach((singleVideo) => {
-//     //     const name = singleVideo.originalname;
-//     //     const videoURL = `/uploadVideo/${name}`;
-//     //     const watermarkImageURL = './uploads/logo.png';
-//     //     const outputFilename = `/outputVideo/${name}`;
-//     //     OutputVideoPath.push(outputFilename);
-//     //     addWatermark(videoURL, watermarkImageURL, outputFilename)
-//     //         .then(() => {
-//     //             console.log('Watermark added successfully!');
-//     //         })
-//     //         .catch((error) => {
-//     //             console.error('Error:', error.message);
-//     //         });
-//     // });
-
-// })
 
 // app.get("/downloadVideo", (req, res) => {
 

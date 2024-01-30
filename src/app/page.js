@@ -14,19 +14,34 @@ const Home = () => {
   const [selectedFiles, setSelectedFiles] = useState(null);
   const [txt, showtxt] = useState(false);
   const [btn, setBtn] = useState(true);
+  const [invalidFile, setInvalidFile] = useState(true);
 
   const handleFileChange = (event) => {
     console.log("file change handling");
-    const temp = event.target.files[0].size;
+    const temp = event.target.files[0];
 
-    console.log(temp);
-    if (temp < maxSize) {
-      setBtn(false);
-      console.log(btn);
+    const pattern = "image/(png|jpg|jpeg|webp)";
+    if (temp.type.match(pattern)) {
+      console.log("yha aa gya");
+      setInvalidFile(true);
+
+      if (temp.size < maxSize) {
+        setBtn(false);
+        console.log(btn);
+      } else {
+        setBtn(true);
+        setSelectedFiles(event.target.files);
+      }
+
     } else {
-      setBtn(true);
-      setSelectedFiles(event.target.files);
+      console.log("niceh wala");
+      setInvalidFile(false);
+      setBtn(false)
     }
+
+    console.log(temp.size);
+
+
   };
 
   const handleUpload = async () => {
@@ -44,6 +59,23 @@ const Home = () => {
 
     await axios.post('http://localhost:3001/upload', formData);
   };
+
+  const handleUploadVideo = async () => {
+    if (!selectedFiles) {
+      console.log("ds");
+      return;
+    }
+
+    const formData = new FormData();
+    for (let i = 0; i < selectedFiles.length; i++) {
+      console.log(`video ${i + 1} uploading`);
+      formData.append(`videos`, selectedFiles);
+    }
+    console.log(...formData);
+
+    await axios.post('http://localhost:3001/upload', formData);
+  }
+
 
   const handleDownload = async (e) => {
     showtxt(true);
@@ -76,21 +108,7 @@ const Home = () => {
     showtxt(false)
 
   };
-  const handleUploadVideo = async () => {
-    if (!selectedFiles) {
-      console.log("ds");
-      return;
-    }
 
-    const formData = new FormData();
-    // for (let i = 0; i < selectedFiles.length; i++) {
-    // console.log(`video ${i + 1} uploading`);
-    formData.append(`videos`, selectedFiles);
-    // }
-    console.log(...formData);
-
-    await axios.post('http://localhost:3001/uploadVideo', formData);
-  }
 
   return (
     <div className="flex flex-col gap-12 items-center justify-center">
@@ -133,13 +151,18 @@ const Home = () => {
         </div>
       }
 
+      {!invalidFile &&
+        <div className='
+      text-slate-400'>
+          Invalid File Format ( Accepted format are : jpg, png, jpeg, webp)
+        </div>}
 
       {/* <div className="flex  items-center justify-center bg-gray-100 font-sans mt-24">
         <label className="mx-auto cursor-pointer flex w-full max-w-lg flex-col items-center rounded-xl border-2 border-dashed border-blue-400 bg-white p-6 px-24 text-center">
 
           {!selectedFiles && <h2 className="mt-4 text-xl font-medium text-gray-700 tracking-wide" > Input Video</h2 >}
 
-          {!selectedFiles && <p className="mt-2 text-gray-500 tracking-wide" > Upload or darg & drop your file  </p >}
+          {!selectedFiles && <p className="mt-2 text-gray-500 tracking-wide" > Upload  your file  </p >}
 
           {selectedFiles && <p className="mt-2 text-gray-500 tracking-wide" > Upload and Download you updated file. </p >}
 

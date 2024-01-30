@@ -1,13 +1,8 @@
 'use client';
-
 import axios from 'axios';
 import fileDownload from 'js-file-download';
 import { useState } from 'react';
-import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
-// const images = require.context("./api/upload/uploads_output", true);
-// const imageList = images.keys().map(image => images(image));
-// console.log(imageList);
+import { HashLoader } from 'react-spinners';
 
 const Home = () => {
   const maxSize = 5120;
@@ -15,26 +10,35 @@ const Home = () => {
   const [txt, showtxt] = useState(false);
   const [btn, setBtn] = useState(true);
   const [invalidFile, setInvalidFile] = useState(true);
+  const [numFile, setNumFile] = useState(0);
+  const [circle, showCircle] = useState(false);
+  const [less, setLess] = useState(true);
 
   const handleFileChange = (event) => {
-    console.log("file change handling");
+    // console.log("file change handling");
     const temp = event.target.files[0];
 
     const pattern = "image/(png|jpg|jpeg|webp)";
+
+    console.log(temp.type);
+
     if (temp.type.match(pattern)) {
-      console.log("yha aa gya");
+
+      // console.log("yha aa gya");
       setInvalidFile(true);
 
       if (temp.size < maxSize) {
         setBtn(false);
+        setLess(false);
         console.log(btn);
       } else {
+        setLess(true);
         setBtn(true);
         setSelectedFiles(event.target.files);
       }
 
     } else {
-      console.log("niceh wala");
+      // console.log("niceh wala");
       setInvalidFile(false);
       setBtn(false)
     }
@@ -46,17 +50,48 @@ const Home = () => {
 
   const handleUpload = async () => {
     if (!selectedFiles) {
-      console.log("ds");
+      console.log("No File Selected");
       return;
     }
 
     const formData = new FormData();
+    const pattern = "image/(png|jpg|jpeg|webp)";
+    // console.log("upload issue starting");
+
     for (let i = 0; i < selectedFiles.length; i++) {
+
+      if (selectedFiles[i].type.match(pattern)) {
+        // console.log("yha aa gya part");
+        setInvalidFile(true);
+
+        if (selectedFiles[i].size < maxSize) {
+          setBtn(false);
+          setLess(true);
+          setSelectedFiles(null);
+        } else {
+          setLess(true);
+          setBtn(true);
+        }
+
+      } else {
+        // console.log("niceh wala part");
+        setInvalidFile(false);
+        setBtn(false)
+        setSelectedFiles(null);
+        return;
+      }
+    }
+
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+
       console.log(`file ${i + 1} uploading`);
       formData.append(`files`, selectedFiles[i]);
-    }
-    console.log(...formData);
 
+    }
+
+    // console.log(...formData);
+    setNumFile(selectedFiles.length)
     await axios.post('http://localhost:3001/upload', formData);
   };
 
@@ -79,7 +114,7 @@ const Home = () => {
 
   const handleDownload = async (e) => {
     showtxt(true);
-
+    showCircle(true);
     e.preventDefault();
     await axios.get('http://localhost:3001/download', {
       responseType: 'blob',
@@ -90,6 +125,8 @@ const Home = () => {
 
     setSelectedFiles(null);
     showtxt(false)
+    showCircle(false);
+    setNumFile(0);
 
   };
 
@@ -115,24 +152,24 @@ const Home = () => {
       <div className="flex  items-center justify-center bg-gray-100 font-sans mt-24">
         <label className="mx-auto cursor-pointer flex w-full max-w-lg flex-col items-center rounded-xl border-2 border-dashed border-blue-400 bg-white p-6 px-24 text-center">
 
-          {!selectedFiles && <h2 className="mt-4 text-xl font-medium text-gray-700 tracking-wide" > Input Photos</h2 >}
+          {numFile == 0 && <h2 className="mt-4 text-xl font-medium text-gray-700 tracking-wide" > Input Photos</h2 >}
 
-          {!selectedFiles && <p className="mt-2 text-gray-500 tracking-wide" > Upload your file  </p >}
+          {numFile == 0 && <p className="mt-2 text-gray-500 tracking-wide" > Upload your file  </p >}
 
-          {selectedFiles && <p className="mt-2 text-gray-500 tracking-wide" > Upload and Download you updated file. </p >}
+          {numFile != 0 && <p className="mt-2 text-gray-500 tracking-wide" > Download you updated file. </p >}
 
 
           <input id="dropzone-file" type="file" multiple className="hidden" onChange={handleFileChange} />
         </label >
       </div >
       <div className="flex gap-10">
-        <button
+        {numFile == 0 && <button
           className="p-4 font-bold text-white bg-red-500 rounded-xl hover:scale-110 "
           disabled={!btn}
           onClick={handleUpload}>
           Upload
-        </button>
-        {selectedFiles && <button
+        </button>}
+        {numFile != 0 && !circle && <button
           className="p-4 font-bold text-white bg-green-500 rounded-xl hover:scale-110"
           onClick={handleDownload}>
           Download
@@ -140,16 +177,27 @@ const Home = () => {
 
       </div>
 
+      {numFile != 0 &&
+
+        <div>{numFile} files are selected</div>
+
+      }
+
       {txt &&
         <div className='text-slate-500 text-xl'>
           Your download will begin in 5 seconds.
         </div>
       }
-      {!btn &&
+      {
+        circle &&
+        <HashLoader />
+      }
+      {!less &&
         <div className='text-slate-400'>
           File Size is below 5kb
         </div>
       }
+
 
       {!invalidFile &&
         <div className='

@@ -15,8 +15,6 @@ const setWatermark = (inputPath, outputPath) => {
     try {
         sharp(inputPath).composite([{
             input: "./uploads/logo.png",
-            bottom: 0,
-            right: 0,
             gravity: 'southeast'
         }]).toFile(outputPath);
     } catch (err) {

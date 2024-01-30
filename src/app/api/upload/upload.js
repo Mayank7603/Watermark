@@ -17,6 +17,7 @@ const setWatermark = (inputPath, outputPath) => {
             input: "./uploads/logo.png",
             bottom: 0,
             right: 0,
+            gravity: 'southeast'
         }]).toFile(outputPath);
     } catch (err) {
         console.error("Error adding watermark:", err);

@@ -14,6 +14,10 @@ const Home = () => {
   const [circle, showCircle] = useState(false);
   const [less, setLess] = useState(true);
 
+  // make use state for video 
+
+  const [selectedVideo, setSelectedVideo] = useState(null);
+
   const handleFileChange = (event) => {
     // console.log("file change handling");
     const temp = event.target.files[0];
@@ -111,6 +115,11 @@ const Home = () => {
     await axios.post('http://localhost:3001/upload', formData);
   }
 
+  const handleVideoChange = (event) => {
+    const temp = event.target.files[0];
+    setSelectedVideo(temp);
+    console.log(temp);
+  }
 
   const handleDownload = async (e) => {
     showtxt(true);
@@ -182,12 +191,12 @@ const Home = () => {
         <div>{numFile} files are selected</div>
 
       }
-
+      {/* 
       {txt &&
         <div className='text-slate-500 text-xl'>
           Your download will begin in 5 seconds.
         </div>
-      }
+      } */}
       {
         circle &&
         <HashLoader />
@@ -215,7 +224,7 @@ const Home = () => {
           {selectedFiles && <p className="mt-2 text-gray-500 tracking-wide" > Upload and Download you updated file. </p >}
 
 
-          <input id="dropzone-file" type="file" multiple className="hidden" onChange={handleFileChange} />
+          <input id="dropzone-file" type="file" className="hidden" onChange={handleVideoChange} />
         </label >
       </div >
       <div className="flex gap-10">

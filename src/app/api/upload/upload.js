@@ -5,6 +5,8 @@ const cors = require("cors");
 const JSZip = require('jszip');
 const fs = require('fs');
 const path = require('path');
+var ffmpeg = require("ffmpeg")
+const axios = require("axios")
 
 const app = express();
 app.use(cors());
@@ -14,8 +16,8 @@ const setWatermark = (inputPath, outputPath) => {
 
     try {
         sharp(inputPath).composite([{
-            input: "./uploads/logo.png",
-            gravity: 'southeast'
+            input: "./uploads/logo_2.png",
+            gravity: 'southeast',
         }]).toFile(outputPath);
     } catch (err) {
         console.error("Error adding watermark:", err);
@@ -31,17 +33,17 @@ const storage = multer.diskStorage({
     },
 });
 
-const storageVideo = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploadVideo/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.originalname);
-    },
-});
+// const storageVideo = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         cb(null, 'uploadVideo/');
+//     },
+//     filename: (req, file, cb) => {
+//         cb(null, file.originalname);
+//     },
+// });
 
 const upload = multer({ storage });
-const uploadVideo = multer({ storageVideo });
+// const uploadVideo = multer({ storageVideo });
 let zipFilePath;
 
 
@@ -81,13 +83,14 @@ async function makeZip(outputPaths) {
 }
 
 var outputPaths = [];
-var OutputVideoPath = [];
+// var OutputVideoPath = [];
 
 
 app.post('/upload', upload.any('files'), async (req, res) => {
     const arr = req.files;
+    console.log(arr);
     arr.forEach(async (singleFile) => {
-        const name = singleFile.originalname;
+        const name = singleFile.originalname
         const inputPath = `uploads/${name}`;
         const path = `uploads_output/${name}`;
         outputPaths.push(path);
@@ -95,28 +98,58 @@ app.post('/upload', upload.any('files'), async (req, res) => {
     });
 });
 
-app.post("/uploadVideo", uploadVideo.any('videos'), async (req, res) => {
-    const arr = req.videos;
 
-    console.log("this :  ", arr);
-    arr.forEach(async (singleVideo) => {
-        const name = singleVideo.originalname;
-        console.log(name);
-        // const videoURL = `/uploadVideo/${name}`;
-        // const watermarkImageURL = './uploads/logo.png';
-        // const outputFilename = `/outputVideo/${name}`;
-        // OutputVideoPath.push(outputFilename);
-        // addWatermark(videoURL, watermarkImageURL, outputFilename)
-        //     .then(() => {
-        //         console.log('Watermark added successfully!');
-        //     })
-        //     .catch((error) => {
-        //         console.error('Error:', error.message);
-        //     });
-    });
 
-})
+// async function addWatermark(videoURL, watermarkImageURL, outputFileName) {
+//     console.log("video watermark start");
+//     const apiURL = `https://api.apyhub.com/generate/video/watermark/url/file?output=${outputFileName}`;
+//     const requestData = {
+//         video_url: videoURL,
+//         watermark_image_url: watermarkImageURL
+//     };
+//     try {
+//         const response = await axios.post(apiURL, requestData, {
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'apy-token': 'APY0SoRbUEhdcJEZhEt4xSGcDByJfjG9vtHFLQbK0nKEZr6fWmv2USxw1eXv9s3fwGvtz'
+//             },
+//             responseType: 'stream'
+//         });
+//         if (!response || !response.data) {
+//             throw new Error('Empty response received');
+//         }
+//         const writeStream = fs.createWriteStream(`outputVideo/${outputFileName}`);
+//         response.data.pipe(writeStream);
+//         return new Promise((resolve, reject) => {
+//             writeStream.on('finish', resolve);
+//             writeStream.on('error', reject);
+//         });
+//     } catch (error) {
+//         throw new Error('Failed to add watermark. ' + error.message);
+//     }
+// }
 
+// app.post("/uploadVideo", upload.any(), async (req, res) => {
+//     const arr = req.files;
+//     console.log(arr); // Check if files are being received
+//     arr.forEach(async (singleFile) => {
+//         const name = singleFile.originalname;
+//         const videoURL = `uploads/${name}`;
+//         const outputFilename = `${name.split('.')[0]}.mp4`;
+//         const watermarkImageURL = 'uploads/logo.jpg';
+
+//         // OutputVideoPath.push(outputFilename);
+
+//         try {
+//             await addWatermark(videoURL, watermarkImageURL, outputFilename);
+//             console.log('Watermark added successfully!');
+//         } catch (error) {
+//             console.error('Error:', error.message);
+//         }
+//     });
+
+//     console.log("finished");
+// });
 app.get("/download", (req, res) => {
 
     makeZip(outputPaths);
@@ -157,30 +190,7 @@ app.get("/download", (req, res) => {
 
 //     console.log(`Zip file created at: ${zipFilePath}`);
 // }
-// async function addWatermark(videoURL, watermarkImageURL, outputFileName) {
-//     const apiURL = 'https://api.apyhub.com/generate/video/watermark/url/file?output=${outputFileName}.mp4'
-//     const requestData = {
-//         video_url: videoURL,
-//         watermark_image_url: watermarkImageURL
-//     };
-//     try {
-//         const response = await axios.post(apiURL, requestData, {
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'apy-token': 'APY0SoRbUEhdcJEZhEt4xSGcDByJfjG9vtHFLQbK0nKEZr6fWmv2USxw1eXv9s3fwGvtz'
-//             },
-//             responseType: 'stream'
-//         });
-//         const writeStream = fs.createWriteStream('outputVideo/${outputFileName}.mp4');
-//         response.data.pipe(writeStream);
-//         return new Promise((resolve, reject) => {
-//             writeStream.on('finish', resolve);
-//             writeStream.on('error', reject);
-//         });
-//     } catch (error) {
-//         throw new Error('Failed to add watermark. ' + error.response.data.error.message);
-//     }
-// }
+
 
 
 

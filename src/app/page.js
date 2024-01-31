@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { HashLoader } from 'react-spinners';
 
 const Home = () => {
-  const maxSize = 5120;
+  const maxSize = 9000;
   const [selectedFiles, setSelectedFiles] = useState(null);
   const [txt, showtxt] = useState(false);
   const [btn, setBtn] = useState(true);
@@ -13,41 +13,51 @@ const Home = () => {
   const [numFile, setNumFile] = useState(0);
   const [circle, showCircle] = useState(false);
   const [less, setLess] = useState(true);
+  const [maxFile, setMaxFile] = useState(false);
 
   // make use state for video 
 
   const [selectedVideo, setSelectedVideo] = useState(null);
 
   const handleFileChange = (event) => {
-    // console.log("file change handling");
+    console.log("file change handling");
     const temp = event.target.files[0];
+    setMaxFile(false);
 
     const pattern = "image/(png|jpg|jpeg|webp)";
 
-    console.log(temp.type);
-
     if (temp.type.match(pattern)) {
 
-      // console.log("yha aa gya");
+      console.log("yha aa gya");
       setInvalidFile(true);
 
       if (temp.size < maxSize) {
         setBtn(false);
         setLess(false);
-        console.log(btn);
       } else {
         setLess(true);
         setBtn(true);
         setSelectedFiles(event.target.files);
+        if (selectedFiles != null) {
+          console.log("Null nhi h bhai ");
+          console.log(selectedFiles.length);
+          setNumFile(selectedFiles.length)
+        }
       }
 
     } else {
-      // console.log("niceh wala");
+      console.log("niceh wala");
       setInvalidFile(false);
       setBtn(false)
     }
 
-    console.log(temp.size);
+    if (selectedFiles) {
+      console.log("Null nhi h bhai ");
+    } else {
+      console.log("Null ha bhai ");
+    }
+
+    console.log("jk", maxFile);
 
 
   };
@@ -61,7 +71,8 @@ const Home = () => {
     const formData = new FormData();
     const pattern = "image/(png|jpg|jpeg|webp)";
     // console.log("upload issue starting");
-
+    const maxFileSize = 5000000;
+    var tempSize = 0;
     for (let i = 0; i < selectedFiles.length; i++) {
 
       if (selectedFiles[i].type.match(pattern)) {
@@ -73,6 +84,7 @@ const Home = () => {
           setLess(true);
           setSelectedFiles(null);
         } else {
+          tempSize += selectedFiles[i].size;
           setLess(true);
           setBtn(true);
         }
@@ -86,6 +98,11 @@ const Home = () => {
       }
     }
 
+    if (tempSize > maxFileSize) {
+      setMaxFile(true);
+    } else {
+      setMaxFile(false);
+    }
 
     for (let i = 0; i < selectedFiles.length; i++) {
 
@@ -99,27 +116,29 @@ const Home = () => {
     await axios.post('http://localhost:3001/upload', formData);
   };
 
-  const handleUploadVideo = async () => {
-    if (!selectedFiles) {
-      console.log("ds");
-      return;
-    }
+  // const handleUploadVideo = async () => {
+  //   if (!selectedVideo) {
+  //     console.log("No video selected.");
+  //     return;
+  //   }
 
-    const formData = new FormData();
-    for (let i = 0; i < selectedFiles.length; i++) {
-      console.log(`video ${i + 1} uploading`);
-      formData.append(`videos`, selectedFiles);
-    }
-    console.log(...formData);
+  //   const formData = new FormData();
+  //   console.log(`Video uploading`);
+  //   formData.append('video', selectedVideo, selectedVideo.name);
 
-    await axios.post('http://localhost:3001/upload', formData);
-  }
+  //   try {
+  //     const response = await axios.post('http://localhost:3001/uploadVideo', formData);
+  //     console.log('Upload successful:', response.data);
+  //   } catch (error) {
+  //     console.error('Upload failed:', error.message);
+  //   }
+  // };
 
-  const handleVideoChange = (event) => {
-    const temp = event.target.files[0];
-    setSelectedVideo(temp);
-    console.log(temp);
-  }
+  // const handleVideoChange = (event) => {
+  //   const temp = event.target.files[0];
+  //   console.log(temp);
+  //   setSelectedVideo(temp);
+  // }
 
   const handleDownload = async (e) => {
     showtxt(true);
@@ -139,21 +158,6 @@ const Home = () => {
 
   };
 
-  const handleDownloadVideo = async (e) => {
-    showtxt(true);
-
-    e.preventDefault();
-    await axios.get('http://localhost:3001/downloadVideo', {
-      responseType: 'blob',
-    }).then((res) => {
-      console.log(res.data);
-      fileDownload(res.data, "watermarkedVideo.zip");
-    });
-
-    setSelectedFiles(null);
-    showtxt(false)
-
-  };
 
 
   return (
@@ -186,17 +190,19 @@ const Home = () => {
 
       </div>
 
+      {maxFile ? <div> Maximum file size exceeded </div> : ""}
+
       {numFile != 0 &&
 
         <div>{numFile} files are selected</div>
 
       }
-      {/* 
+
       {txt &&
         <div className='text-slate-500 text-xl'>
           Your download will begin in 5 seconds.
         </div>
-      } */}
+      }
       {
         circle &&
         <HashLoader />

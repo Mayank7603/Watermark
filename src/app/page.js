@@ -121,7 +121,7 @@ const Home = () => {
 
     // console.log(...formData);
     setNumFile(selectedFiles.length)
-    await axios.post('http://localhost:3001/upload', formData);
+    await axios.post('http://51.79.161.51:3001/upload', formData);
   };
 
   // const handleUploadVideo = async () => {
@@ -152,7 +152,7 @@ const Home = () => {
     showtxt(true);
     showCircle(true);
     e.preventDefault();
-    await axios.get('http://localhost:3001/download', {
+    await axios.get('http://51.79.161.51:3001/download', {
       responseType: 'blob',
     }).then((res) => {
       console.log(res.data);
@@ -217,7 +217,7 @@ const Home = () => {
       }
       {!less &&
         <div className='text-slate-400'>
-          File Size is below 5kb
+          File Size is below 10kb
         </div>
       }
 

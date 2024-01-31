@@ -14,16 +14,26 @@ const Home = () => {
   const [circle, showCircle] = useState(false);
   const [less, setLess] = useState(true);
   const [maxFile, setMaxFile] = useState(false);
+  const [prev, setprev] = useState(true);
 
-  // make use state for video 
+  const handleSecond = (data) => {
 
-  const [selectedVideo, setSelectedVideo] = useState(null);
+    if (data) {
+      // console.log("Null nhi h bhai ");
+      console.log(data);
+      setNumFile(data.length)
+    } else {
+      console.log("Null hai bhai ");
+    }
+  }
 
-  const handleFirst = async (event) => {
+  const handleFirst = (event) => {
     console.log("file change handling");
     const temp = event.target.files[0];
     setMaxFile(false);
+    setprev(true);
 
+    if (!temp) return;
     const pattern = "image/(png|jpg|jpeg|webp)";
 
     if (temp.type.match(pattern)) {
@@ -35,17 +45,12 @@ const Home = () => {
         setBtn(false);
         setLess(false);
       } else {
+
         setLess(true);
         setBtn(true);
         console.log("set kr diya bhai ");
         setSelectedFiles(event.target.files);
-
-        if (selectedFiles) {
-          console.log("Null nhi h bhai ");
-        } else {
-          console.log("Null ha bhai ");
-        }
-        return;
+        return event.target.files;
       }
 
     } else {
@@ -56,19 +61,12 @@ const Home = () => {
 
   };
 
-  const handleSecond = () => {
-
-    // if (selectedFiles) {
-    //   console.log("Null nhi h bhai ");
-    // } else {
-    //   console.log("Null ha bhai ");
-    // }
-
-  }
+  // console.log("selected", selectedFiles)
 
   const handleFileChange = async (event) => {
-    await handleFirst(event);
-    handleSecond();
+    const res = handleFirst(event);
+    handleSecond(res);
+    // setprev(false);
   }
 
   const handleUpload = async () => {
@@ -76,6 +74,7 @@ const Home = () => {
       console.log("No File Selected");
       return;
     }
+    setprev(false);
 
     const formData = new FormData();
     const pattern = "image/(png|jpg|jpeg|webp)";
@@ -122,7 +121,7 @@ const Home = () => {
 
     // console.log(...formData);
     setNumFile(selectedFiles.length)
-    await axios.post('http://51.79.161.51:3001/upload', formData);
+    await axios.post('http://localhost:3001/upload', formData);
   };
 
   // const handleUploadVideo = async () => {
@@ -153,7 +152,7 @@ const Home = () => {
     showtxt(true);
     showCircle(true);
     e.preventDefault();
-    await axios.get('http://51.79.161.51/download', {
+    await axios.get('http://localhost:3001/download', {
       responseType: 'blob',
     }).then((res) => {
       console.log(res.data);
@@ -164,7 +163,7 @@ const Home = () => {
     showtxt(false)
     showCircle(false);
     setNumFile(0);
-
+    setprev(true);
   };
 
 
@@ -174,24 +173,24 @@ const Home = () => {
       <div className="flex  items-center justify-center bg-gray-100 font-sans mt-24">
         <label className="mx-auto cursor-pointer flex w-full max-w-lg flex-col items-center rounded-xl border-2 border-dashed border-blue-400 bg-white p-6 px-24 text-center">
 
-          {numFile == 0 && <h2 className="mt-4 text-xl font-medium text-gray-700 tracking-wide" > Input Photos</h2 >}
+          {prev && <h2 className="mt-4 text-xl font-medium text-gray-700 tracking-wide" > Input Photos</h2 >}
 
-          {numFile == 0 && <p className="mt-2 text-gray-500 tracking-wide" > Upload your file  </p >}
+          {prev && <p className="mt-2 text-gray-500 tracking-wide" > Upload your file  </p >}
 
-          {numFile != 0 && <p className="mt-2 text-gray-500 tracking-wide" > Download you updated file. </p >}
+          {!prev && <p className="mt-2 text-gray-500 tracking-wide" > Download you updated file. </p >}
 
 
           <input id="dropzone-file" type="file" multiple className="hidden" onChange={handleFileChange} />
         </label >
       </div >
       <div className="flex gap-10">
-        {numFile == 0 && <button
+        {prev && <button
           className="p-4 font-bold text-white bg-red-500 rounded-xl hover:scale-110 "
           disabled={!btn}
           onClick={handleUpload}>
           Upload
         </button>}
-        {numFile != 0 && !circle && <button
+        {!prev && !circle && <button
           className="p-4 font-bold text-white bg-green-500 rounded-xl hover:scale-110"
           onClick={handleDownload}>
           Download
@@ -199,9 +198,9 @@ const Home = () => {
 
       </div>
 
-      {maxFile ? <div> Maximum file size exceeded </div> : ""}
+      {/* {maxFile ? <div> Maximum file size exceeded </div> : ""} */}
 
-      {numFile != 0 &&
+      {numFile != 0 && !circle &&
 
         <div>{numFile} files are selected</div>
 
@@ -209,7 +208,7 @@ const Home = () => {
 
       {txt &&
         <div className='text-slate-500 text-xl'>
-          Your download will begin in 5 seconds.
+          Downloading {numFile} Files ...
         </div>
       }
       {

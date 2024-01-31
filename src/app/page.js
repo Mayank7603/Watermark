@@ -19,7 +19,7 @@ const Home = () => {
 
   const [selectedVideo, setSelectedVideo] = useState(null);
 
-  const handleFileChange = (event) => {
+  const handleFirst = async (event) => {
     console.log("file change handling");
     const temp = event.target.files[0];
     setMaxFile(false);
@@ -37,12 +37,15 @@ const Home = () => {
       } else {
         setLess(true);
         setBtn(true);
+        console.log("set kr diya bhai ");
         setSelectedFiles(event.target.files);
-        if (selectedFiles != null) {
+
+        if (selectedFiles) {
           console.log("Null nhi h bhai ");
-          console.log(selectedFiles.length);
-          setNumFile(selectedFiles.length)
+        } else {
+          console.log("Null ha bhai ");
         }
+        return;
       }
 
     } else {
@@ -51,16 +54,22 @@ const Home = () => {
       setBtn(false)
     }
 
-    if (selectedFiles) {
-      console.log("Null nhi h bhai ");
-    } else {
-      console.log("Null ha bhai ");
-    }
-
-    console.log("jk", maxFile);
-
-
   };
+
+  const handleSecond = () => {
+
+    // if (selectedFiles) {
+    //   console.log("Null nhi h bhai ");
+    // } else {
+    //   console.log("Null ha bhai ");
+    // }
+
+  }
+
+  const handleFileChange = async (event) => {
+    await handleFirst(event);
+    handleSecond();
+  }
 
   const handleUpload = async () => {
     if (!selectedFiles) {

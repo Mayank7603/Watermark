@@ -9,7 +9,14 @@ var ffmpeg = require("ffmpeg")
 const axios = require("axios")
 
 const app = express();
-app.use(cors());
+app.use(
+    cors({
+        origin: "*",
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+    })
+);
 const port = 3001;
 
 const setWatermark = (inputPath, outputPath) => {

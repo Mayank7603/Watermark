@@ -1,12 +1,13 @@
-const express = require("express");
-const multer = require("multer");
-const sharp = require("sharp");
-const cors = require("cors");
-const JSZip = require('jszip');
-const fs = require('fs');
-const path = require('path');
-var ffmpeg = require("ffmpeg")
-const axios = require("axios")
+import express from "express";
+import multer from "multer";
+import sharp from "sharp";
+import cors from "cors";
+import JSZip from 'jszip';
+import fs from 'fs';
+import path from 'path';
+import { v2 as cloudinary } from "cloudinary";
+import { video } from "@cloudinary/url-gen/qualifiers/source";
+
 
 const app = express();
 app.use(
@@ -18,6 +19,14 @@ app.use(
     })
 );
 const port = 3001;
+
+
+cloudinary.config({
+    cloud_name: 'dqct40k0n',
+    api_key: '224657579922463',
+    api_secret: 'Yje1I9nL1tF64Fka_MNiV-relZs'
+});
+
 
 const setWatermark = (inputPath, outputPath) => {
 
@@ -40,17 +49,8 @@ const storage = multer.diskStorage({
     },
 });
 
-// const storageVideo = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, 'uploadVideo/');
-//     },
-//     filename: (req, file, cb) => {
-//         cb(null, file.originalname);
-//     },
-// });
 
 const upload = multer({ storage });
-// const uploadVideo = multer({ storageVideo });
 let zipFilePath;
 
 
@@ -67,8 +67,7 @@ async function makeZip(outputPaths) {
 
         for (const file of outputPaths) {
             const filePath = path.join(file);
-            fileContent = fs.readFileSync(filePath);
-            // console.log(Buffer.byteLength(fileContent));
+            var fileContent = fs.readFileSync(filePath);
             var tempFile = {
                 one: filePath,
                 two: fileContent
@@ -90,12 +89,12 @@ async function makeZip(outputPaths) {
 }
 
 var outputPaths = [];
-// var OutputVideoPath = [];
+var OutputVideoPath = [];
 
 
 app.post('/upload', upload.any('files'), async (req, res) => {
     const arr = req.files;
-    console.log(arr);
+    // console.log(arr);
     arr.forEach(async (singleFile) => {
         const name = singleFile.originalname
         const inputPath = `uploads/${name}`;
@@ -105,58 +104,59 @@ app.post('/upload', upload.any('files'), async (req, res) => {
     });
 });
 
+const uploadVideo = async (name) => {
 
+    console.log("aa gya ", name);
+    try {
 
-// async function addWatermark(videoURL, watermarkImageURL, outputFileName) {
-//     console.log("video watermark start");
-//     const apiURL = `https://api.apyhub.com/generate/video/watermark/url/file?output=${outputFileName}`;
-//     const requestData = {
-//         video_url: videoURL,
-//         watermark_image_url: watermarkImageURL
-//     };
-//     try {
-//         const response = await axios.post(apiURL, requestData, {
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'apy-token': 'APY0SoRbUEhdcJEZhEt4xSGcDByJfjG9vtHFLQbK0nKEZr6fWmv2USxw1eXv9s3fwGvtz'
-//             },
-//             responseType: 'stream'
-//         });
-//         if (!response || !response.data) {
-//             throw new Error('Empty response received');
-//         }
-//         const writeStream = fs.createWriteStream(`outputVideo/${outputFileName}`);
-//         response.data.pipe(writeStream);
-//         return new Promise((resolve, reject) => {
-//             writeStream.on('finish', resolve);
-//             writeStream.on('error', reject);
-//         });
-//     } catch (error) {
-//         throw new Error('Failed to add watermark. ' + error.message);
-//     }
-// }
+        cloudinary.uploader.upload_large(`./uploads/${name}`, { resource_type: 'video', public_id: name }, function (error, result) {
+            if (error) {
+                console.error("Error uploading file to Cloudinary:", error);
+                return res.status(500).json({ error: "Error uploading file to Cloudinary" });
+            }
 
-// app.post("/uploadVideo", upload.any(), async (req, res) => {
-//     const arr = req.files;
-//     console.log(arr); // Check if files are being received
-//     arr.forEach(async (singleFile) => {
-//         const name = singleFile.originalname;
-//         const videoURL = `uploads/${name}`;
-//         const outputFilename = `${name.split('.')[0]}.mp4`;
-//         const watermarkImageURL = 'uploads/logo.jpg';
+            res.json({
+                public_id: result.public_id,
+                url: result.secure_url
+            });
+        });
+    } catch (error) {
+        console.error("Error handling file upload:", error);
+        res.status(500).json({ error: "Error handling file upload" });
+    }
 
-//         // OutputVideoPath.push(outputFilename);
+}
 
-//         try {
-//             await addWatermark(videoURL, watermarkImageURL, outputFilename);
-//             console.log('Watermark added successfully!');
-//         } catch (error) {
-//             console.error('Error:', error.message);
-//         }
-//     });
+app.post("/uploadVideo", upload.any(), async (req, res) => {
+    const arr = req.files;
+    arr.forEach(async (singleFile) => {
+        const name = singleFile.originalname;
+        const videoURL = `uploads/${name}`;
+        const outputFilename = `${name.split('.')[0]}.mp4`;
+        const watermarkImageURL = 'uploads/logo.jpg';
+        try {
 
-//     console.log("finished");
-// });
+            cloudinary.uploader.upload_large(`./uploads/${name}`, { resource_type: 'video', public_id: name }, function (error, result) {
+                if (error) {
+                    console.error("Error uploading file to Cloudinary:", error);
+                    return res.status(500).json({ error: "Error uploading file to Cloudinary" });
+                }
+
+                // console.log("Upload result:", result);
+                res.json({
+                    public_id: result.public_id,
+                    url: result.secure_url
+                });
+            });
+        } catch (error) {
+            console.error("Error handling file upload:", error);
+            res.status(500).json({ error: "Error handling file upload" });
+        }
+    });
+
+    console.log("finished");
+});
+
 app.get("/download", (req, res) => {
 
     makeZip(outputPaths);
@@ -167,50 +167,6 @@ app.get("/download", (req, res) => {
     }, 3000);
 
 });
-
-
-// async function makeZipVideo(outputPaths) {
-
-//     const zip = new JSZip();
-//     const folderPath = "./uploadVideo";
-//     var rd = (Math.random() * 100000) / 10;
-//     zipFilePath = "./yeah" + rd + ".zip";
-
-//     const addFilesToZip = async (zipFile, folderPath, currentPath = "") => {
-//         const files = fs.readdirSync(path.join(folderPath, currentPath));
-
-//         for (const file of outputPaths) {
-//             const filePath = path.join(file);
-//             fileContent = fs.readFileSync(filePath);
-//             // console.log(Buffer.byteLength(fileContent));
-//         }
-
-//         for (const abc of temp) {
-//             zipFile.file(abc.one, abc.two);
-//         }
-//     };
-
-//     addFilesToZip(zip, folderPath);
-//     zip.generateAsync({ type: "nodebuffer" }).then((content) => {
-//         fs.writeFileSync(zipFilePath, content);
-//     }).catch((error) => console.log(error));;
-
-//     console.log(`Zip file created at: ${zipFilePath}`);
-// }
-
-
-
-
-// app.get("/downloadVideo", (req, res) => {
-
-//     makeZipVideo(OutputVideoPath);
-//     OutputVideoPath = [];
-//     setTimeout(() => {
-//         res.download(zipFilePath);
-
-//     }, 3000);
-
-// });
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

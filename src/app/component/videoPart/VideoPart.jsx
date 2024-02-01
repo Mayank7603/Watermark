@@ -38,7 +38,10 @@ const VideoPart = () => {
 		formData.append(`files`, selectedVideo[0]);
 
 		console.log(...formData);
-		const ans = await axios.post('http://localhost:3001/uploadVideo', formData);
+		const ans = await axios.post(
+			'http://51.79.161.51:3001/uploadVideo',
+			formData
+		);
 		console.log(ans.data.public_id);
 		setPid(ans.data.public_id);
 	};

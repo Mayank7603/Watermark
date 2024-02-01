@@ -6,7 +6,6 @@ import JSZip from 'jszip';
 import fs from 'fs';
 import path from 'path';
 import { v2 as cloudinary } from "cloudinary";
-import { video } from "@cloudinary/url-gen/qualifiers/source";
 
 
 const app = express();

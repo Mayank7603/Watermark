@@ -6,6 +6,7 @@ import JSZip from 'jszip';
 import fs from 'fs';
 import path from 'path';
 import { v2 as cloudinary } from "cloudinary";
+import { log } from "console";
 
 
 const app = express();
@@ -27,7 +28,7 @@ cloudinary.config({
 });
 
 
-const setWatermark = (inputPath, outputPath) => {
+const setWatermark = async (inputPath, outputPath) => {
 
     try {
         sharp(inputPath).composite([{
@@ -54,7 +55,6 @@ let zipFilePath;
 
 
 async function makeZip(outputPaths) {
-
     const zip = new JSZip();
     const folderPath = "./uploads_output";
     var rd = (Math.random() * 100000) / 10;
@@ -85,11 +85,12 @@ async function makeZip(outputPaths) {
     }).catch((error) => console.log(error));;
 
     console.log(`Zip file created at: ${zipFilePath}`);
+
+
 }
 
 var outputPaths = [];
-var OutputVideoPath = [];
-
+var inputPaths = [];
 
 app.post('/upload', upload.any('files'), async (req, res) => {
     const arr = req.files;
@@ -99,7 +100,8 @@ app.post('/upload', upload.any('files'), async (req, res) => {
         const inputPath = `uploads/${name}`;
         const path = `uploads_output/${name}`;
         outputPaths.push(path);
-        setWatermark(inputPath, path)
+        inputPaths.push(inputPath)
+        await setWatermark(inputPath, path);
     });
 });
 
@@ -155,10 +157,35 @@ app.post("/uploadVideo", upload.any(), async (req, res) => {
 
     console.log("finished");
 });
-
+const deleteIP = (singleFile) => {
+    fs.unlinkSync(singleFile, (err) => {
+        if (err) console.log("delete me yeah error h ", err);
+        else console.log("Deleted hui hui ", singleFile);
+    });
+}
+const deleteOP = (arr) => {
+    arr.forEach((singleFile) => {
+        fs.unlinkSync(singleFile, (err) => {
+            if (err) console.log("delete me yeah error h ", err);
+            else console.log("Deleted hui hui ", singleFile);
+        });
+    })
+}
+let tempZip;
 app.get("/download", (req, res) => {
+    // console.log(zipFilePath);
+    if (!tempZip) {
+        console.log("Temp zip is NUll");
+    } else {
+        console.log(tempZip);
+        deleteIP(tempZip)
+    }
 
     makeZip(outputPaths);
+    tempZip = zipFilePath;
+    deleteOP(outputPaths);
+    deleteOP(inputPaths)
+    inputPaths = [];
     outputPaths = [];
     setTimeout(() => {
         res.download(zipFilePath);

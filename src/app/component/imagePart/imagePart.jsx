@@ -16,11 +16,12 @@ const Home = () => {
 	const [less, setLess] = useState(true);
 	const [maxFile, setMaxFile] = useState(false);
 	const [prev, setprev] = useState(true);
+	const [type, setType] = useState('');
 
 	const handleSecond = (data) => {
 		if (data) {
 			setNumFile(data.length);
-			const maxFileSize = 9000000;
+			const maxFileSize = 15000000;
 			var tempSize = 0;
 			for (let i = 0; i < data.length; i++) {
 				tempSize += data[i].size;
@@ -73,6 +74,11 @@ const Home = () => {
 		// setprev(false);
 	};
 
+	const handleType = (e) => {
+		const { name, value } = e.target;
+		setType(value);
+	};
+
 	const handleUpload = async () => {
 		if (!selectedFiles) {
 			console.log('No File Selected');
@@ -109,8 +115,8 @@ const Home = () => {
 			console.log(`file ${i + 1} uploading`);
 			formData.append(`files`, selectedFiles[i]);
 		}
-
-		// console.log(...formData);
+		formData.append('typeLogo', type);
+		console.log(...formData);
 		setNumFile(selectedFiles.length);
 		await axios.post('http://localhost:3001/upload', formData);
 	};
@@ -168,6 +174,46 @@ const Home = () => {
 						onChange={handleFileChange}
 					/>
 				</label>
+			</div>
+			<div className="flex gap-4">
+				{/* <div className="flex gap-1">
+					<label htmlFor="default">PropertyEase</label>
+					<input
+						type="radio"
+						name="type"
+						id="default"
+						value=""
+						onChange={handleType}
+					/>
+				</div> */}
+				<div className="flex gap-1">
+					<label htmlFor="cm">CourseMentor</label>
+					<input
+						type="radio"
+						name="type"
+						value="cm"
+						onChange={handleType}
+					/>
+				</div>
+				<div className="flex gap-1">
+					<label htmlFor="iwin"> Iwin</label>
+					<input
+						type="radio"
+						name="type"
+						value="iwin"
+						onChange={handleType}
+					/>
+				</div>
+
+				<div className="flex gap-1">
+					<label htmlFor="both">Both</label>
+					<input
+						type="radio"
+						name="type"
+						value="both"
+						onChange={handleType}
+					/>
+				</div>
 			</div>
 			<div className="flex gap-10">
 				{prev && (

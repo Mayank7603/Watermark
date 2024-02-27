@@ -10,6 +10,7 @@ const VideoPart = () => {
 	const [pid, setPid] = useState(null);
 	const [loader, setLoader] = useState(false);
 	const [invalidFile, setInvalidFile] = useState(false);
+	const [type, setType] = useState('');
 
 	const cld = new Cloudinary({ cloud: { cloudName: 'dqct40k0n' } });
 
@@ -36,6 +37,7 @@ const VideoPart = () => {
 
 		const formData = new FormData();
 		formData.append(`files`, selectedVideo[0]);
+		formData.append('typeLogo', type);
 
 		console.log(...formData);
 		const ans = await axios.post(
@@ -68,6 +70,10 @@ const VideoPart = () => {
 		}
 	}
 
+	const handleType = (e) => {
+		const { name, value } = e.target;
+		setType(value);
+	};
 	return (
 		<div>
 			<div className="flex flex-col gap-6 items-center justify-center font-sans mt-24 ">
@@ -101,7 +107,26 @@ const VideoPart = () => {
 						onChange={handleFileChange}
 					/>
 				</label>
-
+				<div className="flex gap-4">
+					<div className="flex gap-1">
+						<label htmlFor="cm">CourseMentor</label>
+						<input
+							type="radio"
+							name="type"
+							value="cm"
+							onChange={handleType}
+						/>
+					</div>
+					<div className="flex gap-1">
+						<label htmlFor="iwin"> Iwin</label>
+						<input
+							type="radio"
+							name="type"
+							value="iwin"
+							onChange={handleType}
+						/>
+					</div>
+				</div>
 				<div className="flex gap-10">
 					{!loader ? (
 						<button
@@ -124,10 +149,21 @@ const VideoPart = () => {
 				) : (
 					''
 				)}
-				{pid ? (
+
+				{console.log(type)}
+				{pid && type == 'iwin' ? (
 					<Video
 						cloudName="dqct40k0n"
-						watermarkId="logo_2_nximfp"
+						watermarkId="kzw41wbrq1k8r3n849mo"
+					/>
+				) : (
+					''
+				)}
+
+				{pid && type == 'cm' ? (
+					<Video
+						cloudName="dqct40k0n"
+						watermarkId="wivgtpymca1f2kw5fhlj"
 					/>
 				) : (
 					''

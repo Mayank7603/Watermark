@@ -41,7 +41,7 @@ const setWatermark_iwin = async (inputPath, outputPath) => {
 
     try {
         sharp(inputPath).resize({ width: 800, height: 600 }).composite([{
-            input: "./uploads/logo_5.png",
+            input: "./uploads/logo_5_3.png",
             gravity: 'southeast',
         }]).toFile(outputPath);
     } catch (err) {
@@ -53,7 +53,7 @@ const setWatermark_cm = async (inputPath, outputPath) => {
 
     try {
         sharp(inputPath).resize({ width: 800, height: 600 }).composite([{
-            input: "./uploads/logo_2.png",
+            input: "./uploads/logo_3_3.png",
             gravity: 'southeast',
         }]).toFile(outputPath);
     } catch (err) {

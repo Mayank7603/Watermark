@@ -117,8 +117,8 @@ const Home = () => {
 		formData.append('typeLogo', type);
 		console.log(...formData);
 		setNumFile(selectedFiles.length);
-		// await axios.post('http://51.79.161.51:3001/upload', formData);
-		await axios.post('http://127.0.0.1:3001/upload', formData);
+		await axios.post('http://51.79.161.51:3001/upload', formData);
+		// await axios.post('http://127.0.0.1:3001/upload', formData);
 	};
 
 	const handleDownload = async (e) => {
@@ -126,7 +126,7 @@ const Home = () => {
 		showtxt(true);
 		showCircle(true);
 		await axios
-			.get('http://127.0.0.1:3001/download', {
+			.get('http://51.79.161.51:3001/download', {
 				responseType: 'blob',
 			})
 			.then((res) => {

@@ -300,13 +300,14 @@ app.get("/download", (req, res) => {
 
     makeZip(outputPaths);
     tempZip = zipFilePath;
-    deleteOP(outputPaths);
-    deleteOP(inputPaths)
-    inputPaths = [];
-    outputPaths = [];
+
+
     setTimeout(() => {
         res.download(zipFilePath);
-
+        deleteOP(outputPaths);
+        deleteOP(inputPaths);
+        inputPaths = [];
+        outputPaths = [];
     }, 3000);
 
 });

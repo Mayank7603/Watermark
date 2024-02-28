@@ -26,7 +26,7 @@ const Home = () => {
 				tempSize += data[i].size;
 			}
 
-			if (tempSize > maxFileSize) {
+			if (tempSize > maxFileSize || data.length > 10) {
 				setBtn((prev) => !prev);
 				setMaxFile(true);
 			} else {
@@ -117,8 +117,8 @@ const Home = () => {
 		formData.append('typeLogo', type);
 		console.log(...formData);
 		setNumFile(selectedFiles.length);
-		await axios.post('http://51.79.161.51:3001/upload', formData);
-		// await axios.post('http://127.0.0.1:3001/upload', formData);
+		// await axios.post('http://51.79.161.51:3001/upload', formData);
+		await axios.post('http://127.0.0.1:3001/upload', formData);
 	};
 
 	const handleDownload = async (e) => {
@@ -126,7 +126,7 @@ const Home = () => {
 		showtxt(true);
 		showCircle(true);
 		await axios
-			.get('http://51.79.161.51:3001/download', {
+			.get('http://127.0.0.1:3001/download', {
 				responseType: 'blob',
 			})
 			.then((res) => {
@@ -234,7 +234,7 @@ const Home = () => {
 				)}
 			</div>
 
-			{maxFile ? <div> Maximum file size exceeded </div> : ''}
+			{maxFile ? <div> Maximum file exceeded (10 Files are allowed) </div> : ''}
 
 			{numFile != 0 && !circle && <div>{numFile} files are selected</div>}
 

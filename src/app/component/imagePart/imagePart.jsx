@@ -3,7 +3,6 @@ import axios from 'axios';
 import fileDownload from 'js-file-download';
 import { useState } from 'react';
 import { HashLoader } from 'react-spinners';
-import { Cloudinary } from '@cloudinary/url-gen';
 
 const Home = () => {
 	const maxSize = 9000;
@@ -119,6 +118,7 @@ const Home = () => {
 		console.log(...formData);
 		setNumFile(selectedFiles.length);
 		await axios.post('http://51.79.161.51:3001/upload', formData);
+		// await axios.post('http://127.0.0.1:3001/upload', formData);
 	};
 
 	const handleDownload = async (e) => {
@@ -131,7 +131,7 @@ const Home = () => {
 			})
 			.then((res) => {
 				console.log(res.data);
-				fileDownload(res.data, 'watermarked.zip');
+				fileDownload(res.data, 'wm_' + Date.now() + '.zip');
 			});
 
 		setSelectedFiles(null);
@@ -175,6 +175,7 @@ const Home = () => {
 					/>
 				</label>
 			</div>
+			<div>Default Logo - PropertyEase</div>
 			<div className="flex gap-4">
 				{/* <div className="flex gap-1">
 					<label htmlFor="default">PropertyEase</label>

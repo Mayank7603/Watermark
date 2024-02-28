@@ -6,6 +6,10 @@ import JSZip from 'jszip';
 import fs from 'fs';
 import path from 'path';
 import { v2 as cloudinary } from "cloudinary";
+import sizeOf from "image-size";
+
+
+
 
 const app = express();
 app.use(
@@ -18,7 +22,6 @@ app.use(
 );
 const port = 3001;
 
-
 cloudinary.config({
     cloud_name: 'dqct40k0n',
     api_key: '224657579922463',
@@ -28,7 +31,19 @@ cloudinary.config({
 const setWatermark = async (inputPath, outputPath) => {
 
     try {
-        sharp(inputPath).resize({ width: 800, height: 600 }).composite([{
+        sharp(inputPath).resize({ width: 1000 }).composite([{
+            input: "./uploads/logo_2.png",
+            gravity: 'southeast',
+        }]).toFile(outputPath);
+    } catch (err) {
+        console.error("Error adding watermark:", err);
+    }
+}
+
+const setWatermark_n = async (inputPath, outputPath) => {
+
+    try {
+        sharp(inputPath).composite([{
             input: "./uploads/logo_2.png",
             gravity: 'southeast',
         }]).toFile(outputPath);
@@ -40,7 +55,18 @@ const setWatermark = async (inputPath, outputPath) => {
 const setWatermark_iwin = async (inputPath, outputPath) => {
 
     try {
-        sharp(inputPath).resize({ width: 800, height: 600 }).composite([{
+        sharp(inputPath).resize({ width: 1000 }).composite([{
+            input: "./uploads/logo_5_3.png",
+            gravity: 'southeast',
+        }]).toFile(outputPath);
+    } catch (err) {
+        console.error("Error adding watermark:", err);
+    }
+}
+const setWatermark_iwin_n = async (inputPath, outputPath) => {
+
+    try {
+        sharp(inputPath).composite([{
             input: "./uploads/logo_5_3.png",
             gravity: 'southeast',
         }]).toFile(outputPath);
@@ -52,7 +78,18 @@ const setWatermark_iwin = async (inputPath, outputPath) => {
 const setWatermark_cm = async (inputPath, outputPath) => {
 
     try {
-        sharp(inputPath).resize({ width: 800, height: 600 }).composite([{
+        sharp(inputPath).resize({ width: 1000 }).composite([{
+            input: "./uploads/logo_3_3.png",
+            gravity: 'southeast',
+        }]).toFile(outputPath);
+    } catch (err) {
+        console.error("Error adding watermark:", err);
+    }
+}
+const setWatermark_cm_n = async (inputPath, outputPath) => {
+
+    try {
+        sharp(inputPath).composite([{
             input: "./uploads/logo_3_3.png",
             gravity: 'southeast',
         }]).toFile(outputPath);
@@ -64,7 +101,22 @@ const setWatermark_cm = async (inputPath, outputPath) => {
 const setWatermark_both = async (inputPath, outputPath) => {
 
     try {
-        sharp(inputPath).resize({ width: 800, height: 600 }).composite([{
+        sharp(inputPath).resize({ width: 1000 }).composite([{
+            input: "./uploads/logo_5_3.png",
+            gravity: 'northwest',
+        }, {
+            input: "./uploads/logo_3_3.png",
+            gravity: 'southeast',
+        }]).toFile(outputPath);
+    } catch (err) {
+        console.error("Error adding watermark:", err);
+    }
+}
+
+const setWatermark_both_n = async (inputPath, outputPath) => {
+
+    try {
+        sharp(inputPath).composite([{
             input: "./uploads/logo_5_3.png",
             gravity: 'northwest',
         }, {
@@ -93,7 +145,7 @@ let zipFilePath;
 async function makeZip(outputPaths) {
     const zip = new JSZip();
     const folderPath = "./uploads_output";
-    var rd = (Math.random() * 100000) / 10;
+    var rd = parseInt((Math.random() * 100000000));
     zipFilePath = "./yeah" + rd + ".zip";
 
     const addFilesToZip = async (zipFile, folderPath, currentPath = "") => {
@@ -134,6 +186,11 @@ app.post('/upload', upload.any('files'), async (req, res) => {
     console.log("logo type ", req.body.typeLogo);
     const lType = req.body.typeLogo;
 
+
+    sizeOf("uploads/logo_2.png", function (err, dimensions) {
+        console.log("maaap   :   ", dimensions.width, dimensions.height)
+    })
+
     arr.forEach(async (singleFile) => {
         const name = singleFile.originalname
         const inputPath = `uploads/${name}`;
@@ -141,19 +198,46 @@ app.post('/upload', upload.any('files'), async (req, res) => {
         outputPaths.push(path);
         inputPaths.push(inputPath)
 
-        if (lType == 'both') {
-            await setWatermark_both(inputPath, path);
-        }
-        else if (lType == 'iwin') {
-            await setWatermark_iwin(inputPath, path);
+        sizeOf(inputPath, async (err, dim) => {
 
-        } else if (lType == 'cm') {
-            await setWatermark_cm(inputPath, path);
+            if (dim.height < 120 || dim.width < 320) {
 
-        } else {
-            await setWatermark(inputPath, path);
 
-        }
+                if (lType == 'both') {
+                    await setWatermark_both(inputPath, path);
+                }
+                else if (lType == 'iwin') {
+                    await setWatermark_iwin(inputPath, path);
+
+                } else if (lType == 'cm') {
+                    await setWatermark_cm(inputPath, path);
+
+                } else {
+                    await setWatermark(inputPath, path);
+
+                }
+
+
+            } else {
+
+
+                if (lType == 'both') {
+                    await setWatermark_both_n(inputPath, path);
+                }
+                else if (lType == 'iwin') {
+                    await setWatermark_iwin_n(inputPath, path);
+
+                } else if (lType == 'cm') {
+                    await setWatermark_cm_n(inputPath, path);
+
+                } else {
+                    await setWatermark_n(inputPath, path);
+
+                }
+            }
+        })
+
+
     });
 });
 

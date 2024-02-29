@@ -15,7 +15,7 @@ const Home = () => {
 	const [less, setLess] = useState(true);
 	const [maxFile, setMaxFile] = useState(false);
 	const [prev, setprev] = useState(true);
-	const [type, setType] = useState('');
+	const [type, setType] = useState('cm');
 
 	const handleSecond = (data) => {
 		if (data) {
@@ -175,7 +175,6 @@ const Home = () => {
 					/>
 				</label>
 			</div>
-			<div>Default Logo - PropertyEase</div>
 			<div className="flex gap-4">
 				{/* <div className="flex gap-1">
 					<label htmlFor="default">PropertyEase</label>
@@ -194,6 +193,7 @@ const Home = () => {
 						name="type"
 						value="cm"
 						onChange={handleType}
+						defaultChecked
 					/>
 				</div>
 				<div className="flex gap-1">
